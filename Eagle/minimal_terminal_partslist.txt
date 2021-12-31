@@ -1,0 +1,38 @@
+Partlist
+
+Exported from minimal_terminal.brd at 30/11/2021 18:54
+
+EAGLE Version 9.6.2 Copyright (c) 1988-2020 Autodesk, Inc.
+
+Assembly variant: 
+
+Part     Value          Package           Library                       Position (mm)         Orientation
+
+C5       22pf           C2.5-3            capacitor-wima                (27 16.65)            R0
+C6       100nf          C2.5-3            capacitor-wima                (132.08 43.19)        R270
+C7       47uf           E2,5-6            rcl                           (99.55 14)            R180
+C8       22pf           C2.5-3            capacitor-wima                (27 36.13)            R0
+C9       100nf          C2.5-3            capacitor-wima                (132.08 51.04)        R270
+C10      100nf          C2.5-3            capacitor-wima                (62.24 11.51)         R0
+C11      100nf          C2.5-3            capacitor-wima                (41.18 52.76)         R270
+C12      100nf          C2.5-3            capacitor-wima                (62.29 29.39)         R0
+IC2      74HC166N       DIL16             74xx-eu                       (54.72 50.24)         R0
+JP1      Power          1X02              pinhead                       (99.55 9)             R180
+JP3                     1X40              pinhead                       (51.31 2.6)           R0
+JP4                     1X20              pinhead                       (127.51 2.6)          R0
+JP7      SPEED          JP2Q              jumper                        (21.59 47.17)         R90
+JP8      UART           1X06              adafruit                      (124.46 59.69)        R180
+JP9      VGA            1X06              adafruit                      (101.6 59.69)         R180
+Q1       24MHZ          Q                 special                       (20.62 26.24)         R90
+R10      10k            0204/7            adafruit                      (49.6 27.49)          R0
+R11      1k             0204/7            adafruit                      (74.9 27.49)          R0
+R12      1k             0204/7            adafruit                      (74.9 30.06)          R0
+R13      150            0204/7            adafruit                      (132.08 36.83)        R0
+R14      75             0204/7            adafruit                      (133.35 29.21)        R90
+R15      75             0204/7            adafruit                      (129.54 29.21)        R90
+R16      10k            0204/7            adafruit                      (49.65 30.06)         R0
+S5       RESET          B3F-10XX          switch-omron                  (20.16 58.86)         R0
+U$1      MINI-DIN6PTH   MINI-DIN6         SparkFun-Connectors           (153.55 55.88)        R270
+UART_PS2 ATMEGA328P-PU  DIP254P762X457-28 Atmel_By_element14_Batch_1-00 (78.81 23.66)         R90
+VGA      ATMEGA328P-PU  DIP254P762X457-28 Atmel_By_element14_Batch_1-00 (78.76 41.57)         R90
+X1                      HDF15H            adafruit                      (142.31 31.36)        R90

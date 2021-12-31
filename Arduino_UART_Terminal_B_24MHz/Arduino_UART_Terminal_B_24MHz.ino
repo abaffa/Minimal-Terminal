@@ -116,20 +116,20 @@ void ProcessChar(byte inbyte)                    // processes a character (accep
 
   frames = 30;                                   // make cursor invisible for a very short time after receiving a character
 
-  if (escvalid > 4) escvalid = 0;                // unverarbeitbare ESC-Sequenzen löschen und dieses Zeichen normal verarbeiten
-  if (inbyte == 27) { escvalid = 1; return; }    // neue ESC sequence starten
+  if (escvalid > 4) escvalid = 0;                // Delete unprocessable ESC sequences and process this character normally
+  if (inbyte == 27) { escvalid = 1; return; }    // start new ESC sequence
 
-  if (escvalid > 0)                              // ES IST BEREITS EIN ESC AKTIV
+  if (escvalid > 0)                              // AN ESC IS ALREADY ACTIVE
   {
     if (escvalid < 2)
     {
-      if (inbyte == '[') escvalid++;             // als 2. Zeichen MUSS '[' kommen
+      if (inbyte == '[') escvalid++;             // '[' MUST come as the 2nd character
       else escvalid = 0;
     }
-    else                                         // es wurde bereits '\e[' korrekt empfangen...
+    else                                         // '\e[' has already been received correctly ...
     {
-      escbuffer[escvalid++] = inbyte;            // ein weiteres Zeichen hinzufügen
-      switch (inbyte)                            // Für jede ESC sequence muss geprüft werden, ob damit der Befehl komplett ist
+      escbuffer[escvalid++] = inbyte;            // add another character
+      switch (inbyte)                            // For each ESC sequence it must be checked whether the command is complete
       {
         case 'S':
           memset((void*)&vram[start][0], 32, WIDTH);
@@ -220,13 +220,13 @@ void ProcessChar(byte inbyte)                    // processes a character (accep
   {
     switch (inbyte)
     {
-      case '\r': col = 0; break;                // Sonderzeichen 'carriage return' abfangen        
-      case '\n':                                 // Sonderzeichen 'newline' abfangen
+      case '\r': col = 0; break;                // Catch the special character 'carriage return'
+      case '\n':                                 // Catch the special character 'newline'
         col = 0;
         if (row < HEIGHT-1) row++; else row=0;
         if (row == start) { memset((void*)&vram[row][0], 32, WIDTH); start++; if (start > HEIGHT-1) start = 0; }
         break;
-      case 8:                                   // Sonderzeichen 'BACKSPACE' abfangen
+      case 8:                                   // Catch the special character 'BACKSPACE'
         if (col > 0) vram[row][--col] = 32;
         else if (row != start) { if (row > 0) row--; else row = HEIGHT-1; vram[row][WIDTH-1] = 32; col = WIDTH-1; }
         break;
@@ -240,7 +240,7 @@ void ProcessChar(byte inbyte)                    // processes a character (accep
             memset((void*)&vram[row][0], 32, WIDTH);
             if (row == start) { start++; if (start > HEIGHT-1) start = 0; }
           }
-          vram[row][col++] = inbyte;             // Zeichen im Terminal ausgeben
+          vram[row][col++] = inbyte;             // Output characters in the terminal
         }
         break;
     }

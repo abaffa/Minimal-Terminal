@@ -1,0 +1,56 @@
+Assembled
+
+O  O|		115200 bps
+O  O|
+
+O==O|		57600 bps
+O  O|
+	
+O  O|		38400 bps
+O==O|
+
+O==O|		9600 bps
+O==O|
+
+--
+UART
+(Reset Btn) Reset|TX|RX|VCC|x|GND (PS/2)
+
+--
+VGA
+(Reset Btn) Reset|TX|RX|VCC|x|GND (PS/2)
+
+------ 
+Original
+
+O  O|		230400 bps
+O  O|
+
+O==O|		115200 bps
+O  O|
+	
+O  O|		57600 bps
+O==O|
+
+O==O|		28800 bps
+O==O|
+
+
+=================================
+.. 115200
+..
+
+== 57600
+..
+
+.. 38400
+==
+
+== 19200
+==
+
+
+
+
+
+
