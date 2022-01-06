@@ -2,7 +2,8 @@
   *****                                                                           *****
   ***** Atmega328P UART & PS/2 Terminal Interface written by Carsten Herting 2021 *****
   *****                   Version 2.2, last update: 02.06.2021                    *****
-  *****                                                                           *****                                                                           
+  *****               US-International version by Augusto Baffa Dec/21            *****
+  *****                                                                           *****
   *************************************************************************************
   This Atmega328P reads serial data from it's UART RX and transfers it to the 2nd
   ATmega328P handling VGA. PS/2 data is converted into ASCII and sent away via UART TX.
@@ -14,9 +15,29 @@
   B0,1: bits 6-7 of transfer output to D6-7 via 1k resistors
   B2: DATA_NEW output to B0 input of 2nd µC
   See license at the end of this file.
+
+ Fuse: FF | D9 | FF | D5
+
+ ** Added Caps lock support jan, 6 2022 Augusto Baffa
 */
+//#define DEBUG
 
 volatile byte ps2_scan = 0;                     // holds valid PS/2 scancode (set this to 0 after processing!)
+
+volatile bool ps2Keyboard_caps_lock = false; // remembers shift lock has been pressed
+volatile boolean cmd_in_progress = false;
+         byte    cmd_value = 0;
+volatile byte    cmd_ack_value = 1;
+         byte    cmd_parity = 0;
+volatile boolean cmd_ack_byte_ok = false;
+volatile int     cmd_count = 0;
+
+volatile byte    cmd_last = 0;
+volatile bool    cmd_resend = false;
+volatile int     cmd_resend_count = 0;
+
+
+
 const byte LookupScanToASCII[4][128] PROGMEM =  // lookup table (in: SHIFT/ALTGR/CTRL keystate and PS/2 scancode, out: ASCII code)
 { 
   { 
@@ -70,10 +91,10 @@ void setup()
   interrupts();   
 
   Serial.begin(230400, SERIAL_8N2);    // @24MHz 230400 can exactly be reached!
-  //int rate[4] = { 103, 51, 25, 12 };  
-  int rate[4] = { 311, 77, 51, 25};  
-  //24MHZ    
-  //((230400/Bauds)*12)+((230400/Bauds)-1)    
+  
+
+  // 24MHZ    
+  // ((230400/Bauds)*12)+((230400/Bauds)-1)    
       
   //1   230400  12 
   //2   115200  25
@@ -87,35 +108,53 @@ void setup()
   //64  3600    831
   //128 1800    1663
   //256 900     3327
-  /*
-Original
-O  O|    230400 bps
-O  O|
 
-O==O|   115200 bps
-O  O|
+  //int rate[4] = { 103, 51, 25, 12 };  
+  //
+  // O  O|   230400 bps
+  // O  O|
+  // 
+  // O==O|   115200 bps
+  // O  O|
+  //   
+  // O  O|    57600 bps
+  // O==O|
+  // 
+  // O==O|    28800 bps
+  // O==O|
+  // 
   
-O  O|   57600 bps
-O==O|
+  int rate[4] = { 311, 77, 51, 25};   // Current Settings
+  //
+  // O  O|   115200 bps
+  // O  O|
+  // 
+  // O==O|    57600 bps
+  // O  O|
+  //   
+  // O  O|    38400 bps
+  // O==O|
+  // 
+  // O==O|     9600 bps
+  // O==O|
+  // 
 
-O==O|   28800 bps
-O==O|
-*/
-//int rate[4] = { 107, 53, 35, 17};  
-//16Mhz
-//300  3332  0.0
-//600 1666  0.0
-//1200  832 0.0
-//2400  416 0.1
-//4800  207 0.2
-//9600  103 0.2
-//14400 68  0.6
-//19200 51  0.2
-//28800 34  0.8
-//38400 25  0.2
-//57600 16  2.1
-//76800 12  0.2
-//115200  8 3.7
+  // 16Mhz
+  // 300  3332  0.0
+  // 600 1666  0.0
+  // 1200  832 0.0
+  // 2400  416 0.1
+  // 4800  207 0.2
+  // 9600  103 0.2
+  // 14400 68  0.6
+  // 19200 51  0.2
+  // 28800 34  0.8
+  // 38400 25  0.2
+  // 57600 16  2.1
+  // 76800 12  0.2
+  // 115200  8 3.7
+  //int rate[4] = { 107, 53, 35, 17};  
+  
   bitWrite(UCSR0A, 1, HIGH);// switch off UART rate multiplier
   UBRR0 = rate[PINC & 0b00000011];
 }
@@ -128,7 +167,14 @@ void loop()
     PORTD = (a << 2);                          // D2-7 hold bits 0-5
     PORTB = ((PORTB & 0b00000100) ^ 0b00000100) | (a >> 6); // B0-1 hold bits 6-7, toggle B2
   }
-  
+
+  if(cmd_resend){
+    cmd_resend = false;
+    Serial.print(" Resend last cmd. ");
+    kbd_send_command(cmd_last);     // now send the data
+  }
+
+
   if (ps2_scan != 0)                           // check for PS2 input
   {    
     byte scan = ps2_scan; ps2_scan = 0;        // take the PS2 scan result and clear it
@@ -138,10 +184,24 @@ void loop()
     static bool released = false;              // indicating that the next key counts as 'released'
     switch (scan)
     {
-      case 17: ALT = !released; released = false; break;             // ALT, ALTGR
+      case 17:  ALT = !released; released = false; break;             // ALT, ALTGR
       case 18: case 89: SHIFT = !released; released = false; break;  // SHIFT LEFT, SHIFT RIGHT     
-      case 20: CTRL = !released; released = false; break;            // CTRL LEFT, CTRL RIGHT
+      case 20:  CTRL = !released; released = false; break;            // CTRL LEFT, CTRL RIGHT
       case 240: released = true; break;                              // key release indicator
+            
+      case 0x58: {
+        if(released){
+          ps2Keyboard_caps_lock = ps2Keyboard_caps_lock? false : true;
+          
+          if (ps2Keyboard_caps_lock) kbd_set_lights(1<<2);
+          else                       kbd_set_lights(0);
+
+          released = false; 
+        }
+                
+        break;
+      }
+      
       default:                                                       // PROCESS ANY OTHER KEYS
       {
         if (released == true) released = false;                      // ignore released keys
@@ -157,13 +217,20 @@ void loop()
             case 105: Serial.print("\e[4~"); break;  // end
             case 125: Serial.print("\e[5~"); break;  // page up
             case 122: Serial.print("\e[6~"); break;  // page dn        
-            case 13: Serial.print("  "); break;       // TAB = 2 SPACES 
-            case 90: Serial.print("\r"); break;       // Enter CRLF
+            case 13:  Serial.print("  "); break;       // TAB = 2 SPACES 
+            case 90:  Serial.print("\r"); break;       // Enter CRLF
+            
             default:
             {
               // select bank of lookup table according to the states of the special keys
               byte s=0; if (SHIFT) s = 1; else if (ALT) s = 2; else if (CTRL) s = 3;
               char p = pgm_read_byte(&LookupScanToASCII[s][scan & 127]);
+
+              if(ps2Keyboard_caps_lock){
+                if(p >= 'a' && p <= 'z') p += ('A'-'a'); 
+                else if(p >= 'A' && p <= 'Z')  p -= ('A'-'a'); 
+              }
+              
               if (p != 0) Serial.print(p);
             }            
           }
@@ -174,13 +241,84 @@ void loop()
   }  
 }
 
+
 ISR(PCINT1_vect)
 {  
   static uint16_t dat = 0;                        // shift the received bits from PS/2 keyboard in
   static uint8_t clk = 0;
   static uint32_t last = 0;
+
+  // This is the code to send a byte to the keyboard. Actually its 12 bits:
+  // a start bit, 8 data bits, 1 parity, 1 stop bit, 1 ack bit (from the kbd)
+  if (cmd_in_progress && cmd_count < 12) {
+
+    if (bitRead(PINC, 4) == HIGH)                   // sampling keyboard data at the rising edge of the PS/2 clock                    
+    {
+      switch (cmd_count) {
+      case 0: // start bit
+        PORTC &= ~(1<<DDC5);                //digitalWrite(ps2Keyboard_DataPin,LOW);
+
+        #ifdef DEBUG
+        Serial.print("|");
+        Serial.print(0);
+        Serial.print("_");
+        #endif
+        
+        break;
+      case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
+        // data bits to shift
+        if((cmd_value & 1) == 0) PORTC &= ~(1<<DDC5); else PORTC |= (1<<DDC5);    // digitalWrite(ps2Keyboard_DataPin,cmd_value&1);
+        
+        #ifdef DEBUG
+        if((cmd_value & 1) == 0) Serial.print(0); else Serial.print(1);
+        #endif
+        
+        cmd_value = cmd_value>>1;
+        break;
+      case 9:  // parity bit
+        if((cmd_parity & 1) == 0) PORTC &= ~(1<<DDC5); else PORTC |= (1<<DDC5);   // digitalWrite(ps2Keyboard_DataPin,cmd_parity);
+        
+        #ifdef DEBUG
+        Serial.print("_");
+        if((cmd_parity & 1) == 0) Serial.print(0); else Serial.print(1);
+        #endif
+        
+        break;
+      case 10:  // stop bit
+        // release the data pin, so stop bit actually relies on pull-up
+        // but this ensures the data pin is ready to be driven by the kbd for
+        // for the next bit.
+        PORTC |= (1<<DDC5);               //digitalWrite(ps2Keyboard_DataPin, HIGH);
+        DDRC &=  ~(1<<DDC5);              //pinMode(ps2Keyboard_DataPin, INPUT);
+
+        #ifdef DEBUG
+        Serial.print("_");
+        Serial.print(1);
+        Serial.print("|");
+        #endif
+        
+        break;
+      case 11: // ack bit - driven by the kbd, so we read its value
+        cmd_ack_value = bitRead(PINC, 5); //digitalRead(ps2Keyboard_DataPin);
+
+        #ifdef DEBUG
+        Serial.print(" minor ack: ");
+        if((cmd_ack_value & 1) == 0) Serial.print(0); else Serial.print(1);
+        Serial.print("! ");
+        #endif
+        
+        cmd_in_progress = false;  // done shifting out
+      }
+  
+      cmd_count++;
+    }
+    return; // don't fall through to the receive section of the ISR
+  }
+
+
   if (bitRead(PINC, 4) == HIGH)                   // sampling keyboard data at the rising edge of the PS/2 clock                    
   {
+
     if (clk < 11)                                 // wait for an entire PS2 datum (start, stop, parits, 8 data bits)
     {
       uint32_t t = micros();
@@ -189,10 +327,196 @@ ISR(PCINT1_vect)
       dat = dat>>1;                               // shift existing bits to the right
       if (bitRead(PINC, 5)) dat |= 0b10000000000;
       clk++;                                      // count the received bits
-      if (clk == 11) { ps2_scan = byte(dat>>1); clk = 0; }   // full datum has been received => strip start, stop parity and store it
+      if (clk == 11) { 
+        ps2_scan = byte(dat>>1);
+        clk = 0; 
+
+        
+        switch (ps2_scan) {
+          case 0xFA: { // command acknowlegde byte
+            cmd_ack_byte_ok = true;
+            
+            cmd_resend_count = 0;
+
+            #ifdef DEBUG
+            Serial.print(" >> ACK! ");
+            #endif
+            
+            ps2_scan = 0;
+            break;
+          }
+
+          #ifdef DEBUG
+          case 0x00: { 
+            Serial.print(" >> Key detection error or internal buffer overrun.");
+
+            ps2_scan = 0;
+            break;
+          }
+          case 0xAA: { 
+            Serial.print(" >> Self test passed (sent after \"0xFF (reset)\" command or keyboard power up).");
+
+            ps2_scan = 0;
+            break;
+          }
+          case 0xEE: { 
+            Serial.print(" >> Response to \"0xEE (echo)\" command.");
+
+            ps2_scan = 0;
+            break;
+          }
+          
+          
+          case 0xFC: case 0xFD: { 
+            
+            Serial.print(" >> Self test failed (sent after \"0xFF (reset)\" command or keyboard power up).");
+
+            ps2_scan = 0;
+            break;
+          }
+          #endif
+          
+          case 0xFE: { 
+            #ifdef DEBUG
+            Serial.print(" >> Resend (keyboard wants controller to repeat last command it sent).");
+            #endif
+            
+            if(cmd_resend_count < 3){
+              cmd_resend_count++;
+              cmd_resend = true;
+            }
+            else
+              cmd_resend_count = 0;
+
+            ps2_scan = 0;
+            break;
+          }
+          
+          #ifdef DEBUG
+          case 0xFF: { 
+            
+            Serial.print(" >>   Key detection error or internal buffer overrun.");
+            
+            ps2_scan = 0;
+            break;
+          }
+          #endif
+        }
+      }   // full datum has been received => strip start, stop parity and store it
     }
   }
 }
+
+// sending command bytes to the keybaord needs proper parity (otherwise the keyboard
+// just asks you to repeat the byte)
+byte odd_parity(byte val) {
+  int i, count = 1;  // start with 0 for even parity
+  for (i=0; i<8; i++) {
+    if (val&1) count++;
+    val = val>>1;
+  }
+  return count & 1; // bottom bit of count is parity bit
+}
+
+
+void kbd_send_command(byte val) {
+
+   cmd_last = val;
+
+  // stop interrupt routine from receiving characters so that we can use it
+  // to send a byte
+
+    
+  // set up the byte to shift out and initialise the ack bit
+  cmd_value      = val;
+  cmd_ack_value  = 1;    // the kbd will clear this bit on receiving the byte
+  cmd_parity     = odd_parity(val);
+
+    
+  // set the data pin as an output, ready for driving
+  
+  PORTC |= (1<<PC5);    //digitalWrite(ps2Keyboard_DataPin, HIGH);
+  DDRC |=  (1<<DDC5);   //pinMode(ps2Keyboard_DataPin, OUTPUT);
+  
+
+  // drive clock pin low - this is going to generate the first
+  // interrupt of the shifting out process
+  DDRC |=  (1<<DDC4);   //pinMode(PS2_INT_PIN, OUTPUT);
+  PORTC &= ~(1<<PC4);   //digitalWrite(PS2_INT_PIN, LOW);
+
+  // wait at least one clock cycle (in case the kbd is mid transmission)
+  delayMicroseconds(60);
+
+  cmd_in_progress = true;
+  cmd_count       = 0;
+
+  // set up the 0 start bit
+  PORTC &= ~(1<<PC5);   //digitalWrite(ps2Keyboard_DataPin, LOW);
+
+  // let go of clock - the kbd takes over driving the clock from here
+  PORTC |= (1<<DDC4);   //digitalWrite(PS2_INT_PIN, HIGH);
+  DDRC &=  ~(1<<DDC4); //pinMode(PS2_INT_PIN, INPUT);
+
+  // wait for interrupt routine to shift out byte, parity and receive ack bit
+  //while (cmd_ack_value!=0) delayMicroseconds(60);
+  while (cmd_in_progress) delayMicroseconds(60);
+
+
+  // switch back to the interrupt routine receiving characters from the kbd
+  cmd_in_progress = false;
+
+}
+
+/*
+void kbd_reset() {
+
+  kbd_send_command(0xFF);   // send the kbd reset code to the kbd: 3 lights
+                            // should flash briefly on the kbd
+
+  // reset all the global variables
+  ps2Keyboard_shift         = false;
+  ps2Keyboard_ctrl          = false;
+  ps2Keyboard_alt           = false;
+  ps2Keyboard_extend        = false;
+  ps2Keyboard_release       = false;
+  ps2Keyboard_caps_lock     = false;
+  cmd_in_progress           = false;
+  cmd_count                 = 0;
+  cmd_value                 = 0;
+  cmd_ack_value             = 1;
+  cmd_last =                = 0;
+  cmd_resend_count          = 0;
+  cmd_resend                = false;
+}
+*/
+
+
+void kbd_set_lights(byte val) {
+
+  // When setting the lights with the 0xED command the keyboard responds
+  // with an "ack byte", 0xFA. This is NOT the same as the "ack bit" that
+  // follows the succesful shifting of each command byte. See this web
+  // page for a good description of all this:
+  // http://www.beyondlogic.org/keyboard/keybrd.htm
+  //https://www.avrfreaks.net/sites/default/files/PS2%20Keyboard.pdf
+  //https://wiki.osdev.org/PS/2_Keyboard
+
+#ifdef DEBUG
+Serial.println();
+Serial.print("send val:");
+Serial.println(val);
+#endif
+
+  cmd_ack_byte_ok = false;   // initialise the ack byte flag
+  kbd_send_command(0xED);    // send the command byte
+  
+  while (!cmd_ack_byte_ok) delayMicroseconds(60) ; // ack byte from keyboard sets this flag
+
+  kbd_send_command(val);     // now send the data
+  
+}
+
+
 
 /*
 -----------
