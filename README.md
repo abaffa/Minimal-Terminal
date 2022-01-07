@@ -5,6 +5,10 @@ This is a Simple Terminal board based on "Minimal-Terminal" project by Carsten H
 There are some few changes in my version like US-International keyboard mapping, other serial speeds (115200, 57600, 38400, 9600 BPS support) and "almost" RC2014 pinout. 
 I'm using this board with my CP/M machine (see http://baffa-2.baffasoft.com.br)
 
+### Video
+[![minimal_terminal_video](http://img.youtube.com/vi/mmQTUNvmSpk/0.jpg)](http://www.youtube.com/watch?v=mmQTUNvmSpk "Baffa-2 Homebrew Microcomputer + Terminal Card")
+
+
 ### RC2014 Minimal-Terminal Module
 This is an untested version of the Minimal Terminal for RC2014 kit, based on "Baffa-2 Terminal v2".
 
@@ -16,8 +20,6 @@ This is the second version of the "Baffa-2 Terminal" including some improvements
 
 ### Baffa-2 Terminal Board v1:
 ![minimal_terminal](minimal_terminal.png)
-
-[![minimal_terminal_video](http://img.youtube.com/vi/BHlpA0TjMsE/0.jpg)](http://www.youtube.com/watch?v=BHlpA0TjMsE "Baffa-2 Homebrew Microcomputer + Terminal Card")
 
 ---
 
