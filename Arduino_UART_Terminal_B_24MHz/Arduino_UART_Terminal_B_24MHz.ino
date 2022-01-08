@@ -112,7 +112,7 @@ void loop()
 
   if (regout != regin)                                        // was a character received
   {
-    if (col < WIDTH & cursor) {
+    if (col < WIDTH & cursor) { 
       cursor = false;
       if((vram[row][col] & 0b10000000) > 0) vram[row][col] &= 0b01111111;            // restore character beneath the cursor BEFORE a possible scrolling happens
       else vram[row][col] |= 0b10000000;
@@ -134,14 +134,25 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
 {
   static bool reverse = false;
   static byte escvalid = 0;                       // Number of valid characters in escbuffer[]
+  static byte esccount = 0;
   static byte escbuffer[5] = { 0,0,0,0,0 };
   byte anz;
   byte r;
   frames = 30;                                    // make cursor invisible for a very short time after receiving a character
 
-  if (escvalid > 4) escvalid = 0;                 // Delete unprocessable ESC sequences and process this character normally
-  if (inbyte == 27) { escvalid = 1; return; }     // start new ESC sequence
+  if (escvalid > 11) escvalid = 0;                 // Delete unprocessable ESC sequences and process this character normally
+  if (esccount >= 5) escvalid = 0;                 // Delete unprocessable ESC sequences and process this character normally
+  
+  
+  if (inbyte == 27) { 
+    escvalid = 1; 
+    esccount = 0;
+    memset((void*)escbuffer, 0, 5);
+    
+    return; 
+   }     // start new ESC sequence
 
+  
   if (escvalid > 0)                               // AN ESC IS ALREADY ACTIVE
   {
     if (escvalid < 2)
@@ -151,101 +162,130 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
     }
     else                                          // '\e[' has already been received correctly ...
     {
-      escbuffer[escvalid++] = inbyte;             // add another character
+      //escbuffer[escvalid++] = inbyte;             // add another character
+      escvalid++;
       switch (inbyte)                             // For each ESC sequence it must be checked whether the command is complete
       {
-        case 'S':
-          memset((void*)&vram[start][0], 32, WIDTH);
-          start++; if (start > HEIGHT-1) start = 0;
-          row++; if (row > HEIGHT-1) row = 0;
-          escvalid = 0; 
+
+        case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':{   // add numbers to ESC sequence
+          
+          escbuffer[esccount] *= 10;
+          escbuffer[esccount] += inbyte - 48;
+          break; 
+        }
+        
+        case ';': {
+          esccount++;
           break;
-        case 'T':
-          start--; if (start < 0) start = HEIGHT-1;
-          row--; if (row < 0) row = HEIGHT-1;
-          memset((void*)&vram[start][0], 32, WIDTH);
-          escvalid = 0; 
-          break;
-        case 'A':                                // move cursor up
+        }
+               
+ 
+        case 'A':                                // ESC[#A  moves cursor up # lines
         {
-          if (escvalid > 4) { anz = (escbuffer[2] - 48) << 1; anz += (anz << 2) + escbuffer[3] - 48; }
-          else if (escvalid == 4) anz = escbuffer[2] - 48; else anz = 1;
+          anz = escbuffer[esccount] > 0 ? escbuffer[esccount] : 1;
           for (r = 0; r < anz; r++) if (row != start) { row--; if (row < 0) row = HEIGHT-1; }
           escvalid = 0; break;
         }
-        case 'B':                                // move cursor down
+        
+        case 'B':                                // ESC[#B  moves cursor down # lines
         {
-          if (escvalid > 4) { anz = (escbuffer[2] - 48) << 1; anz += (anz << 2) + escbuffer[3] - 48; }
-          else if (escvalid == 4) anz = escbuffer[2] - 48; else anz = 1;
+          anz = escbuffer[esccount] > 0 ? escbuffer[esccount] : 1;
           for (r = 0; r < anz; r++) { byte oldrow = row; row++; if (row > HEIGHT-1) row = 0; if (row == start) row = oldrow; }
           escvalid = 0; break;
         }
-        case 'C':                                // move cursor right
+        
+        case 'C':                                // ESC[#C  moves cursor right # columns
         {
-          if (escvalid > 4) { anz = (escbuffer[2] - 48) << 1; anz += (anz << 2) + escbuffer[3] - 48; }
-          else if (escvalid == 4) anz = escbuffer[2] - 48; else anz = 1;
+          anz = escbuffer[esccount] > 0 ? escbuffer[esccount] : 1;
           for (r = 0; r < anz; r++) if (col < WIDTH-1) col++;
           escvalid = 0; break;
         }
-        case 'D':                                // move cursor left
+        
+        case 'D':                                // ESC[#D  moves cursor left # columns
         {
-          if (escvalid > 4) { anz = (escbuffer[2] - 48) << 1; anz += (anz << 2) + escbuffer[3] - 48; }
-          else if (escvalid == 4) anz = escbuffer[2] - 48; else anz = 1;
+          anz = escbuffer[esccount] > 0 ? escbuffer[esccount] : 1;
           for (r = 0; r < anz; r++) if (col > 0) col--;
           escvalid = 0; break;
         }
-        case 'G':                                // move cursor to an absolute x position (left border: 1)
-        {
-          if (escvalid > 4) { anz = (escbuffer[2] - 48) << 1; col = min(WIDTH-1, max(0, (anz << 2) + anz + escbuffer[3] - 48 - 1)); }
-          else if (escvalid == 4) { col = min(WIDTH-1, max(0, escbuffer[2] - 48 - 1)); }
-          else col = 0;
-          escvalid = 0; break;
-        }
+
         case 'd':                                // move cursor to an absolute x position (left border: 1)
         {
-          if (escvalid > 4)
+
+          if (escbuffer[esccount] > 0)
           {
-            anz = (escbuffer[2] - 48) << 1;
-            row = start + min(HEIGHT-1, max(0, (anz << 2) + anz + escbuffer[3] - 48 - 1));
-            if (row > HEIGHT-1) row -=HEIGHT;
-          }
-          else if (escvalid == 4)
-          {
-            row = start + min(HEIGHT-1, max(0, escbuffer[2] - 48 - 1));
+            row = start + min(HEIGHT-1, max(0, escbuffer[esccount]-1));
             if (row > HEIGHT-1) row -=HEIGHT;
           }
           else row = start;
           escvalid = 0; break;
         }
-        case 'H':                                // move cursor to upper left corner
-          row = start; col = 0;
+
+        case 'E':                                // ESC[#E  moves cursor to beginning of next line, # lines down
+        {
+          col = 0;
+          anz = escbuffer[esccount] > 0 ? escbuffer[esccount] : 1;
+          for (r = 0; r < anz; r++) { byte oldrow = row; row++; if (row > HEIGHT-1) row = 0; if (row == start) row = oldrow; }
           escvalid = 0; break;
+        }
+        
+        case 'F':                                // ESC[#F  moves cursor to beginning of previous line, # lines up
+        {
+          col = 0;
+          anz = escbuffer[esccount] > 0 ? escbuffer[esccount] : 1;
+          for (r = 0; r < anz; r++) if (row != start) { row--; if (row < 0) row = HEIGHT-1; }
+          escvalid = 0; break;
+        }        
+
+        case 'G':                                // ESC[#G  moves cursor to column #
+        {
+          if (escbuffer[esccount] > 0)          
+            col = min(WIDTH-1, max(0, escbuffer[esccount]-1));
+          else col = 0;
+          escvalid = 0; break;
+        }
+       
+        case 'H': case 'f':                     // move cursor to upper left corner
+
+          if(esccount == 1){
+
+            row = min(HEIGHT-1, max(0, escbuffer[0]-1));
+            col = min(WIDTH-1,  max(0, escbuffer[1]-1));
+          }
+          else{
+            row = start; col = 0;
+          }
+          escvalid = 0; break;
+        
         case 'J':                                // clear VRAM from cursor onwards
         {
-          if (escvalid == 4) anz = escbuffer[2] - 48; else anz = 0;
-          if (anz > 3) anz = 0;
+          anz = escbuffer[esccount];
 
           switch(anz){
-            case 0:{
-              memset((void*)&vram[row][col], 32, WIDTH-col);
+            case 0:{            // erase from cursor until end of screen
               r = row;
-              do { if (++r > HEIGHT-1) r = 0; memset((void*)&vram[r][0], 32, WIDTH); } while (r != start);
+              memset((void*)&vram[r++][col], 32, WIDTH-col);              
+              while (r != start && r < HEIGHT){
+                memset((void*)&vram[r++][0], 32, WIDTH); 
+              } 
               break;
             }
           
-            case 1:{
-              memset((void*)&vram[row][col], 32, WIDTH-col);
+            case 1:{            //erase from cursor to beginning of screen
               r = row;
-              while (r > start) { memset((void*)&vram[r][0], 32, WIDTH); r--;}
+              memset((void*)&vram[r--][0], 32, col+1);
+              while (r > 0) { 
+                memset((void*)&vram[r][0], 32, WIDTH);
+                if(r > 0) r--; else break;
+              }
               break;
             }
 
-            case 2:{
+            case 2:{            // erase entire screen
               memset((void*)vram, 32, WIDTH * HEIGHT);   // clear the entire VRAM
               break;
             }
 
-            case 3:{
+            case 3:{            //erase saved lines
                memset((void*)&vram[row][0], 32, WIDTH);   // clear the entire VRAM
               break;
             }
@@ -254,20 +294,20 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
           escvalid = 0; 
           break;
         }
+        
         case 'K':                                // clear line from cursor onwards (does not move the cursor)
-          if (escvalid == 4) anz = escbuffer[2] - 48; else anz = 0;
-          if (anz > 2) anz = 0;
+          anz = escbuffer[esccount];
 
           switch(anz){
-            case 0:{
-              memset((void*)&vram[row][col], 32, WIDTH-col);
+            case 0:{ 
+              memset((void*)&vram[row][col], 32, WIDTH-col);  // ESC[K = ESC[0K erase from cursor to end of line
               break;
             }
-            case 1:{
+            case 1:{          // erase start of line to the cursor
               memset((void*)&vram[row][0], 32, col+1);
               break;
             }
-            case 2:{
+            case 2:{          // erase the entire line
               memset((void*)&vram[row][0], 32, WIDTH);
               break;
             }
@@ -277,27 +317,44 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
           
           break;
 
+
         case 'm':                            
         {
-          if (escvalid > 4) { anz = (escbuffer[2] - 48) << 1; anz += (anz << 2) + escbuffer[3] - 48; }
-          else if (escvalid == 4) anz = escbuffer[2] - 48; else anz = 0;
 
-          switch(anz){
-            case 0: case 27:{
-              reverse = false;
-              break;
-            }
-            case 7:{
-              reverse = true;
-              break;
+          for(r = 0; r <=esccount; r++){
+            anz = escbuffer[r];
+            switch(anz){
+              case 0: case 27:{  //reset all modes / reset inverse mode
+                reverse = false;
+                break;
+              }
+              case 7:{  //set inverse/reverse mode
+                reverse = true;
+                break;
+              }
             }
           }
           
           escvalid = 0; 
           break;
-        }         
-          
-        case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': break;    // add numbers to ESC sequence
+        }          
+
+        case 'S':{
+          memset((void*)&vram[start][0], 32, WIDTH);
+          start++; if (start > HEIGHT-1) start = 0;
+          row++; if (row > HEIGHT-1) row = 0;
+          escvalid = 0;
+          break;
+        }
+        
+        case 'T':{
+          start--; if (start < 0) start = HEIGHT-1;
+          row--; if (row < 0) row = HEIGHT-1;
+          memset((void*)&vram[start][0], 32, WIDTH);
+          escvalid = 0;
+          break;
+        }
+        
         default: escvalid = 0; break;            // all other chars -> end ESC sequence
       }
     }
@@ -313,27 +370,24 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
         if (row == start) { memset((void*)&vram[row][0], 32, WIDTH); start++; if (start > HEIGHT-1) start = 0; }
         break;
       case 8:                                   // Catch the special character 'BACKSPACE'
-        if (col > 0) vram[row][--col] = 32;
+        if (col > 0) vram[row][--col] =32;
         else if (row != start) { if (row > 0) row--; else row = HEIGHT-1; vram[row][WIDTH-1] = 32; col = WIDTH-1; }
         break;
       default:
         if (inbyte >= 32)                       // start of printable characters
         {
+          vram[row][col++] = (reverse ?  inbyte | 0b10000000 : inbyte);             // Output characters in the terminal
           if (col > WIDTH-1)
           {
             col = 0;
             if (row < HEIGHT-1) row++; else row=0;
-            memset((void*)&vram[row][0], 32, WIDTH);
-            if (row == start) { start++; if (start > HEIGHT-1) start = 0; }
-          }
-          vram[row][col++] = (reverse ?  inbyte | 0b10000000 : inbyte);             // Output characters in the terminal
-                    
+            if (row == start) { memset((void*)&vram[row][0], 32, WIDTH); start++; if (start > HEIGHT-1) start = 0; }
+          }                            
         }
         break;
     }
   }
 }
-
 /*
 -----------
 MIT License
