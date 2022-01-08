@@ -19,12 +19,15 @@
  Fuse: FF | D9 | FF | D5
 
  ** Added Caps lock support jan, 6 2022 Augusto Baffa
+ ** Added Num lock support jan, 8 2022 Augusto Baffa
 */
 //#define DEBUG
+//#define DEBUG_SCANCODE
 
 volatile byte ps2_scan = 0;                     // holds valid PS/2 scancode (set this to 0 after processing!)
 
 volatile bool ps2Keyboard_caps_lock = false; // remembers shift lock has been pressed
+volatile bool ps2Keyboard_num_lock = false; // remembers shift lock has been pressed
 volatile boolean cmd_in_progress = false;
          byte    cmd_value = 0;
 volatile byte    cmd_ack_value = 1;
@@ -45,7 +48,7 @@ const byte LookupScanToASCII[4][128] PROGMEM =  // lookup table (in: SHIFT/ALTGR
 { 
   { 
     // plain key
-    0,120,0,116,114,112,113,123,0,121,119,117,115,9,96,0,0,0,0,0,0,113,49,0,0,0,122,115,97,119,50,0,0,99,120,100,101,52,51,0,0,32,118,102,116,114,53,0,0,110,98,104,103,121,54,0,0,0,109,106,117,55,56,0,0,44,107,105,111,48,57,0,0,46,47,108,59,112,45,0,0,0,39,0,91,61,0,0,0,0,10,93,0,92,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,127,68,53,82,85,27,78,122,43,51,45,42,0,0,0
+    0,120,0,116,114,112,113,123,0,121,119,117,115,9,96,0,0,0,0,0,0,113,49,0,0,0,122,115,97,119,50,0,0,99,120,100,101,52,51,0,0,32,118,102,116,114,53,0,0,110,98,104,103,121,54,0,0,0,109,106,117,55,56,0,0,44,107,105,111,48,57,0,0,46,47,108,59,112,45,0,0,0,39,0,91,61,0,0,0,0,10,93,0,92,0,0,0,92,0,0,0,0,8,0,0,0,0,0,0,46,0,0,48,127,68,53,82,85,27,78,122,43,51,45,42,0,0,0
     },
 /* //OLD    
     0,0,0,0,0,0,0,0,          0,0,0,0,0,0,94,0,           0,0,0,0,0,113,49,0,         0,0,122,115,97,119,50,0,     // plain key
@@ -55,7 +58,7 @@ const byte LookupScanToASCII[4][128] PROGMEM =  // lookup table (in: SHIFT/ALTGR
 */
   { 
     // with SHIFT
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,126,0,0,0,0,0,0,81,33,0,0,0,90,83,65,87,64,0,0,67,88,68,69,36,35,0,0,0,86,70,84,82,37,0,0,78,66,72,71,89,94,0,0,0,77,74,85,38,42,0,0,60,75,73,79,41,40,0,0,62,63,76,58,80,95,0,0,0,34,0,123,43,0,0,0,0,0,125,0,124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,37,0,0,0,0,0,43,35,45,42,0,0,0
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,126,0,0,0,0,0,0,81,33,0,0,0,90,83,65,87,64,0,0,67,88,68,69,36,35,0,0,0,86,70,84,82,37,0,0,78,66,72,71,89,94,0,0,0,77,74,85,38,42,0,0,60,75,73,79,41,40,0,0,62,63,76,58,80,95,0,0,0,34,0,123,43,0,0,0,0,0,125,0,124,0,0,0,124,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,37,0,0,0,0,0,43,35,45,42,0,0,0
     },
 /* //OLD        
     0,0,0,0,0,0,0,0,          0,0,0,0,0,0,248,0,          0,0,0,0,0,81,33,0,          0,0,90,83,65,87,34,0,        // with SHIFT
@@ -205,6 +208,13 @@ void loop()
     static bool SHIFT = false;
     static bool CTRL = false;
     static bool released = false;              // indicating that the next key counts as 'released'
+    
+    #ifdef DEBUG_SCANCODE
+    int code = scan;
+    Serial.print(code);
+    Serial.print(" >> ");
+    #endif
+    
     switch (scan)
     {
       case 17:  ALT = !released; released = false; break;             // ALT, ALTGR
@@ -216,15 +226,27 @@ void loop()
         if(released){
           ps2Keyboard_caps_lock = ps2Keyboard_caps_lock? false : true;
           
-          if (ps2Keyboard_caps_lock) kbd_set_lights(1<<2);
-          else                       kbd_set_lights(0);
+          kbd_set_lights(ps2Keyboard_caps_lock<<2 | ps2Keyboard_num_lock <<1);
 
           released = false; 
         }
                 
         break;
       }
-      
+
+      case 0x77: {
+        if(released){
+          ps2Keyboard_num_lock = ps2Keyboard_num_lock? false : true;
+          
+          kbd_set_lights(ps2Keyboard_caps_lock<<2 | ps2Keyboard_num_lock <<1);
+
+          released = false; 
+        }
+                
+        break;
+      }
+
+
       default:                                                       // PROCESS ANY OTHER KEYS
       {
         if (released == true) released = false;                      // ignore released keys
@@ -232,14 +254,14 @@ void loop()
         {
           switch (scan)
           {
-            case 117: Serial.print("\e[A"); break;   // cursor up
-            case 114: Serial.print("\e[B"); break;   // cursor down
-            case 116: Serial.print("\e[C"); break;   // cursor right              
-            case 107: Serial.print("\e[D"); break;   // cursor left
-            case 108: Serial.print("\e[1~"); break;  // pos1 / home
-            case 105: Serial.print("\e[4~"); break;  // end
-            case 125: Serial.print("\e[5~"); break;  // page up
-            case 122: Serial.print("\e[6~"); break;  // page dn        
+            case 117: Serial.print(ps2Keyboard_num_lock ? "8" : "\e[A"); break;   // cursor up
+            case 114: Serial.print(ps2Keyboard_num_lock ? "2" : "\e[B"); break;   // cursor down
+            case 116: Serial.print(ps2Keyboard_num_lock ? "6" : "\e[C"); break;   // cursor right              
+            case 107: Serial.print(ps2Keyboard_num_lock ? "4" : "\e[D"); break;   // cursor left
+            case 108: Serial.print(ps2Keyboard_num_lock ? "7" : "\e[1~"); break;  // pos1 / home
+            case 105: Serial.print(ps2Keyboard_num_lock ? "1" : "\e[4~"); break;  // end
+            case 125: Serial.print(ps2Keyboard_num_lock ? "9" : "\e[5~"); break;  // page up
+            case 122: Serial.print(ps2Keyboard_num_lock ? "3" : "\e[6~"); break;  // page dn        
             case 13:  Serial.print("  "); break;       // TAB = 2 SPACES 
             case 90:  Serial.print("\r"); break;       // Enter CRLF
             
@@ -252,6 +274,12 @@ void loop()
               if(ps2Keyboard_caps_lock){
                 if(p >= 'a' && p <= 'z') p += ('A'-'a'); 
                 else if(p >= 'A' && p <= 'Z')  p -= ('A'-'a'); 
+              }
+              if(ps2Keyboard_num_lock ){
+                switch (scan)
+                {
+                  case 113: p = '.'; break;
+                }
               }
               
               if (p != 0) Serial.print(p);
