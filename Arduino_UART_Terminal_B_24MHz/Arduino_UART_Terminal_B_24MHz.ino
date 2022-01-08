@@ -160,6 +160,8 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
       if (inbyte == '[') escvalid++;              // '[' MUST come as the 2nd character
       else escvalid = 0;
     }
+    else if(inbyte == 0x20) // ignore espaces while in escape mode
+      return;
     else                                          // '\e[' has already been received correctly ...
     {
       //escbuffer[escvalid++] = inbyte;             // add another character
@@ -272,10 +274,11 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
           
             case 1:{            //erase from cursor to beginning of screen
               r = row;
-              memset((void*)&vram[r--][0], 32, col+1);
-              while (r > 0) { 
-                memset((void*)&vram[r][0], 32, WIDTH);
-                if(r > 0) r--; else break;
+              memset((void*)&vram[r][0], 32, col+1);
+              if(r > 0){
+                do{
+                  memset((void*)&vram[--r][0], 32, WIDTH);
+                } while (r > 0);
               }
               break;
             }

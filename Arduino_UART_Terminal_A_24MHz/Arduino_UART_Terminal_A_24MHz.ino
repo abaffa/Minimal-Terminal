@@ -36,7 +36,10 @@ volatile byte    cmd_last = 0;
 volatile bool    cmd_resend = false;
 volatile int     cmd_resend_count = 0;
 
-
+int vga_count = 0;
+bool vga_show_title = true;
+const char vga_title[81] PROGMEM = "\e[24;0HBaffa-Terminal v1.2\e[25;0HBased on Minimal-Terminal by Herting 2021\e[0;0H";
+const char vga_clear[5] PROGMEM = "\e[2J";
 
 const byte LookupScanToASCII[4][128] PROGMEM =  // lookup table (in: SHIFT/ALTGR/CTRL keystate and PS/2 scancode, out: ASCII code)
 { 
@@ -157,15 +160,35 @@ void setup()
   
   bitWrite(UCSR0A, 1, HIGH);// switch off UART rate multiplier
   UBRR0 = rate[PINC & 0b00000011];
+
+  delay(1000);
+
+  for(vga_count = 0; vga_count < 80; vga_count++){
+    delayMicroseconds(500);
+    send_vga(pgm_read_byte(&vga_title[vga_count]));
+  }
+}
+
+void send_vga(byte a){
+    PORTD = (a << 2);                          // D2-7 hold bits 0-5
+    PORTB = ((PORTB & 0b00000100) ^ 0b00000100) | (a >> 6); // B0-1 hold bits 6-7, toggle B2
 }
 
 void loop()
 {
   if (Serial.available())
   {
+      if(vga_show_title){
+        for(vga_count = 0; vga_count < 4; vga_count++){
+          delayMicroseconds(500);
+          send_vga(pgm_read_byte(&vga_clear[vga_count]));
+        }
+        delayMicroseconds(500);
+        vga_show_title = false;
+      }
+  
     byte a = Serial.read();
-    PORTD = (a << 2);                          // D2-7 hold bits 0-5
-    PORTB = ((PORTB & 0b00000100) ^ 0b00000100) | (a >> 6); // B0-1 hold bits 6-7, toggle B2
+    send_vga(a);
   }
 
   if(cmd_resend){
