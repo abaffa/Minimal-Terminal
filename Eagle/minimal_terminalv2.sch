@@ -14474,7 +14474,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <sheet>
 <description>Minimal Terminal</description>
 <plain>
-<text x="203.2" y="-45.72" size="1.778" layer="91">Pin 1      RED              Red Signal
+<text x="78.74" y="-104.14" size="1.778" layer="91">Pin 1      RED              Red Signal
 Pin 2      GREEN          Green Signal
 Pin 3      BLUE             Blue Signal
 Pin 4      ID2/RES         Previously Monitor ID bit 2, reserved since E-DDC
@@ -14695,7 +14695,7 @@ Pin 15    ID3/SCL        Previously Monitor ID bit 3, I²C clock since DDC2
 <instance part="R14" gate="G$1" x="160.02" y="-40.64" rot="R180"/>
 <instance part="R15" gate="G$1" x="160.02" y="-33.02" rot="R180"/>
 <instance part="JP9" gate="A" x="129.54" y="63.5" rot="R90"/>
-<instance part="GND8" gate="1" x="50.8" y="71.12"/>
+<instance part="GND8" gate="1" x="53.34" y="53.34"/>
 <instance part="GND9" gate="1" x="71.12" y="-7.62"/>
 <instance part="P+7" gate="VCC" x="71.12" y="45.72" smashed="yes">
 <attribute name="VALUE" x="71.12" y="45.72" size="1.778" layer="96"/>
@@ -14713,11 +14713,11 @@ Pin 15    ID3/SCL        Previously Monitor ID bit 3, I²C clock since DDC2
 <instance part="JP4" gate="A" x="-106.68" y="-58.42"/>
 <instance part="JP1" gate="G$1" x="-71.12" y="66.04" rot="MR0"/>
 <instance part="IC1" gate="A1" x="-33.02" y="73.66"/>
-<instance part="XTAL" gate="G$1" x="66.04" y="86.36"/>
-<instance part="P+10" gate="VCC" x="78.74" y="101.6"/>
+<instance part="XTAL" gate="G$1" x="68.58" y="68.58"/>
+<instance part="P+10" gate="VCC" x="81.28" y="83.82"/>
 <instance part="C1" gate="G$1" x="-50.8" y="68.58"/>
 <instance part="C2" gate="G$1" x="-20.32" y="68.58"/>
-<instance part="JP2" gate="B" x="-172.72" y="-27.94" rot="R270"/>
+<instance part="JP2" gate="B" x="-22.86" y="-78.74" rot="R270"/>
 </instances>
 <busses>
 </busses>
@@ -14792,13 +14792,13 @@ Pin 15    ID3/SCL        Previously Monitor ID bit 3, I²C clock since DDC2
 </segment>
 <segment>
 <pinref part="GND8" gate="1" pin="GND"/>
-<wire x1="50.8" y1="78.74" x2="50.8" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="60.96" x2="53.34" y2="55.88" width="0.1524" layer="91"/>
 <pinref part="XTAL" gate="G$1" pin="7"/>
-<wire x1="58.42" y1="78.74" x2="50.8" y2="78.74" width="0.1524" layer="91"/>
+<wire x1="60.96" y1="60.96" x2="53.34" y2="60.96" width="0.1524" layer="91"/>
 <pinref part="XTAL" gate="G$1" pin="4"/>
-<wire x1="58.42" y1="86.36" x2="50.8" y2="86.36" width="0.1524" layer="91"/>
-<wire x1="50.8" y1="86.36" x2="50.8" y2="78.74" width="0.1524" layer="91"/>
-<junction x="50.8" y="78.74"/>
+<wire x1="60.96" y1="68.58" x2="53.34" y2="68.58" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="68.58" x2="53.34" y2="60.96" width="0.1524" layer="91"/>
+<junction x="53.34" y="60.96"/>
 </segment>
 <segment>
 <pinref part="VGA" gate="A" pin="GND_2"/>
@@ -14955,8 +14955,8 @@ Pin 15    ID3/SCL        Previously Monitor ID bit 3, I²C clock since DDC2
 <segment>
 <pinref part="XTAL" gate="G$1" pin="14"/>
 <pinref part="P+10" gate="VCC" pin="VCC"/>
-<wire x1="73.66" y1="93.98" x2="78.74" y2="93.98" width="0.1524" layer="91"/>
-<wire x1="78.74" y1="93.98" x2="78.74" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="76.2" y1="76.2" x2="81.28" y2="76.2" width="0.1524" layer="91"/>
+<wire x1="81.28" y1="76.2" x2="81.28" y2="81.28" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="UART_TX" class="0">
@@ -14969,15 +14969,15 @@ Pin 15    ID3/SCL        Previously Monitor ID bit 3, I²C clock since DDC2
 <label x="10.16" y="33.02" size="1.778" layer="95"/>
 </segment>
 <segment>
-<wire x1="-160.02" y1="-33.02" x2="-160.02" y2="-30.48" width="0.1524" layer="91"/>
-<wire x1="-160.02" y1="-30.48" x2="-160.02" y2="-27.94" width="0.1524" layer="91"/>
-<wire x1="-160.02" y1="-30.48" x2="-157.48" y2="-30.48" width="0.1524" layer="91"/>
-<junction x="-160.02" y="-30.48"/>
-<label x="-157.48" y="-30.48" size="1.778" layer="95" xref="yes"/>
+<wire x1="-10.16" y1="-83.82" x2="-10.16" y2="-81.28" width="0.1524" layer="91"/>
+<wire x1="-10.16" y1="-81.28" x2="-10.16" y2="-78.74" width="0.1524" layer="91"/>
+<wire x1="-10.16" y1="-81.28" x2="-7.62" y2="-81.28" width="0.1524" layer="91"/>
+<junction x="-10.16" y="-81.28"/>
+<label x="-7.62" y="-81.28" size="1.778" layer="95" xref="yes"/>
 <pinref part="JP2" gate="B" pin="4"/>
-<wire x1="-165.1" y1="-27.94" x2="-160.02" y2="-27.94" width="0.1524" layer="91"/>
+<wire x1="-15.24" y1="-78.74" x2="-10.16" y2="-78.74" width="0.1524" layer="91"/>
 <pinref part="JP2" gate="B" pin="8"/>
-<wire x1="-160.02" y1="-33.02" x2="-165.1" y2="-33.02" width="0.1524" layer="91"/>
+<wire x1="-10.16" y1="-83.82" x2="-15.24" y2="-83.82" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$14" class="0">
@@ -15210,13 +15210,13 @@ Pin 15    ID3/SCL        Previously Monitor ID bit 3, I²C clock since DDC2
 </segment>
 <segment>
 <pinref part="XTAL" gate="G$1" pin="8"/>
-<wire x1="73.66" y1="78.74" x2="78.74" y2="78.74" width="0.1524" layer="91"/>
-<label x="83.82" y="78.74" size="1.778" layer="95" xref="yes"/>
+<wire x1="76.2" y1="60.96" x2="81.28" y2="60.96" width="0.1524" layer="91"/>
+<label x="86.36" y="60.96" size="1.778" layer="95" xref="yes"/>
 <pinref part="XTAL" gate="G$1" pin="11"/>
-<wire x1="78.74" y1="78.74" x2="83.82" y2="78.74" width="0.1524" layer="91"/>
-<wire x1="73.66" y1="86.36" x2="78.74" y2="86.36" width="0.1524" layer="91"/>
-<wire x1="78.74" y1="86.36" x2="78.74" y2="78.74" width="0.1524" layer="91"/>
-<junction x="78.74" y="78.74"/>
+<wire x1="81.28" y1="60.96" x2="86.36" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="76.2" y1="68.58" x2="81.28" y2="68.58" width="0.1524" layer="91"/>
+<wire x1="81.28" y1="68.58" x2="81.28" y2="60.96" width="0.1524" layer="91"/>
+<junction x="81.28" y="60.96"/>
 </segment>
 </net>
 <net name="N$31" class="0">
@@ -15340,14 +15340,14 @@ Pin 15    ID3/SCL        Previously Monitor ID bit 3, I²C clock since DDC2
 <label x="10.16" y="35.56" size="1.778" layer="95"/>
 </segment>
 <segment>
-<wire x1="-162.56" y1="-30.48" x2="-162.56" y2="-25.4" width="0.1524" layer="91"/>
-<wire x1="-162.56" y1="-25.4" x2="-160.02" y2="-25.4" width="0.1524" layer="91"/>
-<label x="-160.02" y="-25.4" size="1.778" layer="95" xref="yes"/>
+<wire x1="-12.7" y1="-81.28" x2="-12.7" y2="-76.2" width="0.1524" layer="91"/>
+<wire x1="-12.7" y1="-76.2" x2="-10.16" y2="-76.2" width="0.1524" layer="91"/>
+<label x="-10.16" y="-76.2" size="1.778" layer="95" xref="yes"/>
 <pinref part="JP2" gate="B" pin="6"/>
-<wire x1="-162.56" y1="-30.48" x2="-165.1" y2="-30.48" width="0.1524" layer="91"/>
+<wire x1="-12.7" y1="-81.28" x2="-15.24" y2="-81.28" width="0.1524" layer="91"/>
 <pinref part="JP2" gate="B" pin="2"/>
-<wire x1="-162.56" y1="-25.4" x2="-165.1" y2="-25.4" width="0.1524" layer="91"/>
-<junction x="-162.56" y="-25.4"/>
+<wire x1="-12.7" y1="-76.2" x2="-15.24" y2="-76.2" width="0.1524" layer="91"/>
+<junction x="-12.7" y="-76.2"/>
 </segment>
 </net>
 <net name="VGARX" class="0">
@@ -15381,9 +15381,9 @@ Pin 15    ID3/SCL        Previously Monitor ID bit 3, I²C clock since DDC2
 <label x="-119.38" y="-12.7" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
-<pinref part="JP2" gate="B" pin="1"/>
-<wire x1="-180.34" y1="-25.4" x2="-185.42" y2="-25.4" width="0.1524" layer="91"/>
-<label x="-185.42" y="-25.4" size="1.778" layer="95" rot="R180" xref="yes"/>
+<pinref part="JP2" gate="B" pin="3"/>
+<wire x1="-30.48" y1="-78.74" x2="-35.56" y2="-78.74" width="0.1524" layer="91"/>
+<label x="-35.56" y="-78.74" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="TXA" class="0">
@@ -15393,9 +15393,9 @@ Pin 15    ID3/SCL        Previously Monitor ID bit 3, I²C clock since DDC2
 <label x="-119.38" y="-10.16" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
-<pinref part="JP2" gate="B" pin="3"/>
-<wire x1="-180.34" y1="-27.94" x2="-185.42" y2="-27.94" width="0.1524" layer="91"/>
-<label x="-185.42" y="-27.94" size="1.778" layer="95" rot="R180" xref="yes"/>
+<pinref part="JP2" gate="B" pin="1"/>
+<wire x1="-30.48" y1="-76.2" x2="-35.56" y2="-76.2" width="0.1524" layer="91"/>
+<label x="-35.56" y="-76.2" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="RXB" class="0">
@@ -15405,9 +15405,9 @@ Pin 15    ID3/SCL        Previously Monitor ID bit 3, I²C clock since DDC2
 <label x="-119.38" y="-78.74" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
-<pinref part="JP2" gate="B" pin="5"/>
-<wire x1="-180.34" y1="-30.48" x2="-185.42" y2="-30.48" width="0.1524" layer="91"/>
-<label x="-185.42" y="-30.48" size="1.778" layer="95" rot="R180" xref="yes"/>
+<pinref part="JP2" gate="B" pin="7"/>
+<wire x1="-30.48" y1="-83.82" x2="-35.56" y2="-83.82" width="0.1524" layer="91"/>
+<label x="-35.56" y="-83.82" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="TXB" class="0">
@@ -15417,9 +15417,9 @@ Pin 15    ID3/SCL        Previously Monitor ID bit 3, I²C clock since DDC2
 <label x="-119.38" y="-76.2" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 <segment>
-<pinref part="JP2" gate="B" pin="7"/>
-<wire x1="-180.34" y1="-33.02" x2="-185.42" y2="-33.02" width="0.1524" layer="91"/>
-<label x="-185.42" y="-33.02" size="1.778" layer="95" rot="R180" xref="yes"/>
+<pinref part="JP2" gate="B" pin="5"/>
+<wire x1="-30.48" y1="-81.28" x2="-35.56" y2="-81.28" width="0.1524" layer="91"/>
+<label x="-35.56" y="-81.28" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="N$9" class="0">

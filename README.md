@@ -11,15 +11,16 @@ The prototype board has been tested with my CP/M machine (see http://baffa-2.baf
 
 
 ### RC2014 Minimal-Terminal Module
-This is an untested version of the Minimal Terminal for RC2014 kit, based on "Baffa-2 Terminal v2".
+This is an untested version of the Minimal Terminal for RC2014 kit, based on "Baffa-2 Terminal v2". Try at your own risk!
 
 ![minimal_terminalv2_rc2014](minimal_terminalv2_rc2014.png)
 
 ### Baffa-2 Terminal Board v2:
-This is the second version of the "Baffa-2 Terminal" including some improvements that I scratched over the first version.
+This is the second version of the "Baffa-2 Terminal" including some improvements that I scratched over the first version.  Try at your own risk!
 ![minimal_terminalv2](minimal_terminalv2.png)
 
 ### Baffa-2 Terminal Board v1:
+This is the current prototype of the "Baffa-2 Terminal" board. Some fixes made on this board are included in the latest versions.
 ![minimal_terminal](minimal_terminal.png)
 
 ---
