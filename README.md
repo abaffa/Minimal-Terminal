@@ -2,8 +2,9 @@
 
 This is a Simple Terminal board based on "Minimal-Terminal" project by Carsten Herting (oct/2021 https://github.com/slu4coder/Minimal-Terminal).
 
-There are some few changes in my version like US-International keyboard mapping, other serial speeds (115200, 57600, 38400, 9600 BPS support) and "almost" RC2014 pinout. 
-I'm using this board with my CP/M machine (see http://baffa-2.baffasoft.com.br)
+Current version supports US-International keyboard mapping, four basic serial speeds (115200, 57600, 38400, 9600 BPS) and [supports some basic CSI/Ansi escapes](supported_escapes.md).
+ 
+The prototype board has been tested with my CP/M machine (see http://baffa-2.baffasoft.com.br) but there is another board compatible with RC2014 pinout. 
 
 ### Video
 [![minimal_terminal_video](http://img.youtube.com/vi/mmQTUNvmSpk/0.jpg)](http://www.youtube.com/watch?v=mmQTUNvmSpk "Baffa-2 Homebrew Microcomputer + Terminal Card")
