@@ -23,6 +23,9 @@
 #define HEIGHT    25
 
 char row = 0, col = 0;            // current cursor position in terminal window
+//char saved_row = 0, saved_col = 0;            // current cursor position in terminal window
+//bool show_cursor = true;
+
 volatile int vline = 0;           // current vertical position of pixel video output
 volatile byte vram[HEIGHT][WIDTH];// array of VideoRAM
 volatile char start = 0;          // start line of the VideoRAM (thus avoiding moving data while scrolling)
@@ -95,7 +98,8 @@ void setup()
 void loop()
 {  
   static bool cursor = false;
-  if ((frames & 63) == 32) {
+  
+  if ((frames & 63) == 32) { //if (show_cursor && (frames & 63) == 32) {
       if(!cursor){
         cursor = true;
         if((vram[row][col] & 0b10000000) == 0) vram[row][col] |= 0b10000000;
@@ -176,7 +180,7 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
           break; 
         }
         
-        case ';': {
+        case ';': { //case '?': 
           esccount++;
           break;
         }
@@ -246,7 +250,7 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
           escvalid = 0; break;
         }
        
-        case 'H': case 'f':                     // move cursor to upper left corner
+        case 'H': case 'f':{                     // move cursor to upper left corner
 
           if(esccount == 1){
 
@@ -259,7 +263,15 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
             row = start; col = 0;
           }
           escvalid = 0; break;
-        
+        }
+
+/*
+        case 'h':{                    // Cursor visible
+          //if (escbuffer[1] == 25) show_cursor = true;                              
+          escvalid = 0;   
+        }
+*/
+      
         case 'J':                                // clear VRAM from cursor onwards
         {
           anz = escbuffer[esccount];
@@ -322,7 +334,13 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
           
           break;
 
-
+/*
+        case 'l':{                    // Cursor invisible
+          if (escbuffer[1] == 25) show_cursor = false;                              
+          escvalid = 0;   
+        }
+*/
+        
         case 'm':                            
         {
 
@@ -345,21 +363,44 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
         }          
 
         case 'S':{
-          memset((void*)&vram[start][0], 32, WIDTH);
-          start++; if (start > HEIGHT-1) start = 0;
-          row++; if (row > HEIGHT-1) row = 0;
+
+          anz = escbuffer[esccount] > 0 ? escbuffer[esccount] : 1;
+          for (r = 0; r < anz; r++){
+            memset((void*)&vram[start][0], 32, WIDTH);
+            start++; if (start > HEIGHT-1) start = 0;
+            row++; if (row > HEIGHT-1) row = 0;
+          }
           escvalid = 0;
           break;
         }
-        
+/*
+        case 's':{        // save the cursor position
+          saved_row = row;
+          saved_col = col;
+        }
+*/        
         case 'T':{
-          start--; if (start < 0) start = HEIGHT-1;
-          row--; if (row < 0) row = HEIGHT-1;
-          memset((void*)&vram[start][0], 32, WIDTH);
+
+          anz = escbuffer[esccount] > 0 ? escbuffer[esccount] : 1;
+          for (r = 0; r < anz; r++){
+            start--; if (start < 0) start = HEIGHT-1;
+            row--; if (row < 0) row = HEIGHT-1;
+            memset((void*)&vram[start][0], 32, WIDTH);
+          }
           escvalid = 0;
           break;
         }
-        
+/*
+        case 'u':{                     // move cursor to previously saved position
+
+          row = start + min(HEIGHT-1, max(0, saved_row));
+          if (row > HEIGHT-1) row -=HEIGHT;
+          
+          col = min(WIDTH-1,  max(0, saved_col));
+
+          escvalid = 0; break;
+        }        
+*/        
         default: escvalid = 0; break;            // all other chars -> end ESC sequence
       }
     }

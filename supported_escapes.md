@@ -35,8 +35,8 @@ For example:
 | `ESC[#E`                                           | moves cursor to beginning of next line, # lines down     |
 | `ESC[#F`                                           | moves cursor to beginning of previous line, # lines up   |
 | `ESC[#G`                                           | moves cursor to column #                                 |
-| `ESC[S`                                            | scrolls down one line                                    |
-| `ESC[T`                                            | scrolls up one line                                      |
+| `ESC[#S`                                           | scrolls down # lines                                     |
+| `ESC[#T`                                           | scrolls up # lines                                       |
 
 ## Supported Erase Functions
 
