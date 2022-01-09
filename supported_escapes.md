@@ -45,7 +45,7 @@ For example:
 | `ESC[J`           | erase in display (same as ESC\[0J)        |
 | `ESC[0J`          | erase from cursor until end of screen     |
 | `ESC[1J`          | erase from cursor to beginning of screen  |
-| `ESC[2J`          | erase entire screen                       |
+| `ESC[2J`          | erase entire screen (set position:0,0)    |
 | `ESC[K`           | erase in line (same as ESC\[0K)           |
 | `ESC[0K`          | erase from cursor to end of line          |
 | `ESC[1K`          | erase start of line to the cursor         |

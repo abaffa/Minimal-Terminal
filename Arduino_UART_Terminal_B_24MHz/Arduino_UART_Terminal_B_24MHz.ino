@@ -297,13 +297,11 @@ void ProcessChar(byte inbyte)                     // processes a character (acce
               break;
             }
 
-            case 2:{            // erase entire screen
+            case 2:case 3:{            // erase entire screen
+              start = 0;
+              row = 0;
+              col = 0;
               memset((void*)vram, 32, WIDTH * HEIGHT);   // clear the entire VRAM
-              break;
-            }
-
-            case 3:{            //erase saved lines
-               memset((void*)&vram[row][0], 32, WIDTH);   // clear the entire VRAM
               break;
             }
           }
