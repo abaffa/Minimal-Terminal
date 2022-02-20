@@ -170,6 +170,8 @@ void setup()
     delayMicroseconds(500);
     send_vga(pgm_read_byte(&vga_title[vga_count]));
   }
+
+  kbd_reset();
 }
 
 void send_vga(byte a){
@@ -336,6 +338,7 @@ ISR(PCINT1_vect)
         
         break;
       case 10:  // stop bit
+      /*
         // release the data pin, so stop bit actually relies on pull-up
         // but this ensures the data pin is ready to be driven by the kbd for
         // for the next bit.
@@ -347,7 +350,7 @@ ISR(PCINT1_vect)
         Serial.print(1);
         Serial.print("|");
         #endif
-        
+        */
         break;
       case 11: // ack bit - driven by the kbd, so we read its value
         cmd_ack_value = bitRead(PINC, 5); //digitalRead(ps2Keyboard_DataPin);
@@ -362,6 +365,20 @@ ISR(PCINT1_vect)
       }
   
       cmd_count++;
+    }
+    else if (cmd_count == 10 && bitRead(PINC, 4) == LOW){
+      // release the data pin, so stop bit actually relies on pull-up
+        // but this ensures the data pin is ready to be driven by the kbd for
+        // for the next bit.
+        PORTC |= (1<<DDC5);               //digitalWrite(ps2Keyboard_DataPin, HIGH);
+        DDRC &=  ~(1<<DDC5);              //pinMode(ps2Keyboard_DataPin, INPUT);
+
+        #ifdef DEBUG
+        Serial.print("_");
+        Serial.print(1);
+        Serial.print("|");
+        #endif
+        cmd_count++;
     }
     return; // don't fall through to the receive section of the ISR
   }
@@ -518,28 +535,30 @@ void kbd_send_command(byte val) {
 
 }
 
-/*
+
 void kbd_reset() {
 
   kbd_send_command(0xFF);   // send the kbd reset code to the kbd: 3 lights
                             // should flash briefly on the kbd
 
   // reset all the global variables
-  ps2Keyboard_shift         = false;
-  ps2Keyboard_ctrl          = false;
-  ps2Keyboard_alt           = false;
-  ps2Keyboard_extend        = false;
-  ps2Keyboard_release       = false;
-  ps2Keyboard_caps_lock     = false;
-  cmd_in_progress           = false;
-  cmd_count                 = 0;
-  cmd_value                 = 0;
-  cmd_ack_value             = 1;
-  cmd_last =                = 0;
-  cmd_resend_count          = 0;
-  cmd_resend                = false;
+  ps2_scan = 0;                     // holds valid PS/2 scancode (set this to 0 after processing!)
+
+  ps2Keyboard_caps_lock = false; // remembers shift lock has been pressed
+  ps2Keyboard_num_lock = false; // remembers shift lock has been pressed
+  cmd_in_progress = false;
+  cmd_value = 0;
+  cmd_ack_value = 1;
+  cmd_parity = 0;
+  cmd_ack_byte_ok = false;
+  cmd_count = 0;
+
+  cmd_last = 0;
+  cmd_resend = false;
+  cmd_resend_count = 0;
+
 }
-*/
+
 
 
 void kbd_set_lights(byte val) {
