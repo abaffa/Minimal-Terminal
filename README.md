@@ -1,4 +1,4 @@
-# Baffa Terminal (minimal-terminal clone) [![Hackaday.io](https://img.shields.io/badge/Hackaday.io--blue.svg)](https://hackaday.io/project/183266-baffa-2-homebrew-microcomputer)
+# Baffa Terminal (minimal-terminal clone) [![Hackaday.io](https://img.shields.io/badge/Hackaday.io--blue.svg)](https://hackaday.io/project/184235-60x25-minimal-terminal)
 
 This is a Simple Terminal board based on "Minimal-Terminal" project by Carsten Herting (oct/2021 https://github.com/slu4coder/Minimal-Terminal).
 
