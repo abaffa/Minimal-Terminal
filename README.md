@@ -1,7 +1,5 @@
 # Baffa Terminal (minimal-terminal clone) [![Hackaday.io](https://img.shields.io/badge/Hackaday.io--blue.svg)](https://hackaday.io/project/184235-60x25-minimal-terminal)
 
-Thanks Richard for helping me to recover my account on Hackaday :)
-
 This is a Simple Terminal board based on "Minimal-Terminal" project by Carsten Herting (oct/2021 https://github.com/slu4coder/Minimal-Terminal).
 
 Current version supports US-International keyboard mapping, four basic serial speeds (115200, 57600, 38400, 9600 BPS) and [supports some basic CSI/Ansi escapes](supported_escapes.md).
@@ -11,19 +9,18 @@ The prototype board has been tested with my CP/M machine (see http://baffa-2.baf
 ### Video
 [![minimal_terminal_video](http://img.youtube.com/vi/mmQTUNvmSpk/0.jpg)](http://www.youtube.com/watch?v=mmQTUNvmSpk "Baffa-2 Homebrew Microcomputer + Terminal Card")
 
+### Baffa-2 Terminal Board v2:
+This is the second version of the "Baffa-2 Terminal" including some improvements that I scratched over the first version.  
+
+[Order Baffa-2 Minimal Terminal PCB from PCBWay](https://www.pcbway.com/project/shareproject/Baffa_2_Minimal_Terminal_f85704c4.html)
+
+![minimal_terminalv2](_images/baffa2_minimal_terminal_rev1.png)
 
 ### RC2014 Minimal-Terminal Module
-This is an untested version of the Minimal Terminal for RC2014 kit, based on "Baffa-2 Terminal v2". Try at your own risk!
 
-![minimal_terminalv2_rc2014](minimal_terminalv2_rc2014.png)
+[Order RC2014 Minimal Terminal PCB from PCBWay](https://www.pcbway.com/project/shareproject/RC2014_Minimal_Terminal_41593f8c.html)
 
-### Baffa-2 Terminal Board v2:
-This is the second version of the "Baffa-2 Terminal" including some improvements that I scratched over the first version.  Try at your own risk!
-![minimal_terminalv2](minimal_terminalv2.png)
-
-### Baffa-2 Terminal Board v1:
-This is the current prototype of the "Baffa-2 Terminal" board. Some fixes made on this board are included in the latest versions.
-![minimal_terminal](minimal_terminal.png)
+![minimal_terminalv2_rc2014](_images/minimal_terminalv2_rc2014.png)
 
 ---
 
@@ -39,7 +36,7 @@ https://docs.google.com/document/d/1c2ZHtLd1BBAwcBAjBZZJmCA3AXpbpv80dlAtsMYpuF4/
 ---
 MIT License
 
-Copyright (c) 2021 Carsten Herting
+Copyright (c) 2021 Augusto Baffa, Carsten Herting
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
