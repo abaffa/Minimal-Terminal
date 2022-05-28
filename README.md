@@ -9,32 +9,45 @@ The prototype board has been tested with my CP/M machine (see http://baffa-2.baf
 ### Video
 [![minimal_terminal_video](http://img.youtube.com/vi/mmQTUNvmSpk/0.jpg)](http://www.youtube.com/watch?v=mmQTUNvmSpk "Baffa-2 Homebrew Microcomputer + Terminal Card")
 
-### Baffa-2 Terminal Board v2:
-This is the second version of the "Baffa-2 Terminal" including some improvements that I scratched over the first version.  
+## Baffa-2 Terminal Board:
 
 [Order Baffa-2 Minimal Terminal PCB from PCBWay](https://www.pcbway.com/project/shareproject/Baffa_2_Minimal_Terminal_f85704c4.html)
 
 ![minimal_terminalv2](_images/baffa2_minimal_terminal_rev1.png)
 
-### RC2014 Minimal-Terminal Module
+## RC2014 Minimal-Terminal Module
 
 [Order RC2014 Minimal Terminal PCB from PCBWay](https://www.pcbway.com/project/shareproject/RC2014_Minimal_Terminal_41593f8c.html)
 
 ![minimal_terminalv2_rc2014](_images/minimal_terminalv2_rc2014.png)
 
----
+## Bill of Materials
 
-## Original Minimal-Terminal Read.me
-
-Minimal serial UART terminal with VGA and PS2 for up to 230400bps based upon ATmega328P.
-
-This little gadget it ideally suited to be used together with the 'Minimal UART CPU System': https://github.com/slu4coder/Minimal-UART-CPU-System
-
-See the manual section 'Native Tool Chain / Terminal' for more information:
-https://docs.google.com/document/d/1c2ZHtLd1BBAwcBAjBZZJmCA3AXpbpv80dlAtsMYpuF4/edit?usp=sharing
-
----
-MIT License
+| Qty | Value | Parts | Description |
+|:---:|:----------:|:-----|:-----|
+| 1 |  PINHD-1X20 | JP4 |  PIN HEADER |
+| 1 |  PINHD-1X40 | JP3 |  PIN HEADER |
+| 6 |  100nf | C2, C6, C9, C10, C11, C12 | CAPACITOR |
+| 2 |  10k | R10, R16 | RESISTOR |
+| 1 | 150 | R13 | RESISTOR |
+| 2 |  1k | R11, R12 | RESISTOR |
+| 1 |  24Mhz XTAL |  XTAL |  XTAL SOCKET-14 |
+| 1 |  330nf | C1 | CAPACITOR |
+| 1 |  47uf | C7 | POLARIZED CAPACITOR |
+| 1 |  74HC166N |  IC2 |  8-bit parallel load SHIFT REGISTER |
+| 2 | 75 | R14, R15 | RESISTOR, American symbol |
+| 1 |  7806T | IC1 |  Positive VOLTAGE REGULATOR |
+| 2 |  ATMEGA328P-PU | UART_PS2, VGA |  PDIP-28 Atmel |
+| 1 |  BUS UART | JP2 |  JUMPER |
+| 1 |  MINI-DIN6PTH |  PS2_DIN |  mini DIN 6 Connector |
+| 1 |  Power 9-12v | JP1 |  PIN HEADER |
+| 1 |  RESET | S5 | MOM SWITCH |
+| 1 |  SPEED | JP7 |  JUMPER |
+| 1 | PINHD-1X6 | UART |  PIN HEADER |
+| 1 | PINHD-1X6 |  VGA |  PIN HEADER |
+| 1 | DSUB | VGA Output | SUB-D |
+ 
+## License
 
 Copyright (c) 2021 Augusto Baffa, Carsten Herting
 
